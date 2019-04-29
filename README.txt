@@ -12,4 +12,5 @@ Team Members:
 
 Notes or comments to the grader:
 
-N/A
+Original repository at https://github.com/dragynmada/CS400QuizGenerator
+Created new repository at https://github.com/andrew-bbq/QuizLad to avoid issues revolving around lacking a .gitignore file.
