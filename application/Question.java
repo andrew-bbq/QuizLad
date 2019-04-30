@@ -4,31 +4,27 @@ import java.util.ArrayList;
 import javafx.scene.image.ImageView;
 
 public class Question {
-  String questionTitle;
-  ArrayList<String> options;
-  int correctIndex;
-  ImageView image;
+	protected String questionTitle;
+	protected ArrayList<String> options;
+	protected int correctIndex;
+	protected String imagePath;
 
-  public Question(String questionTitle, ArrayList<String> options, int correctIndex,
-      String imagePath) {
-    this.questionTitle = questionTitle;
-    this.options = options;
-    this.correctIndex = correctIndex;
-    if (imagePath != null)
-      this.image = new ImageView(imagePath);
-    else
-      this.image = null;
-  }
+	public Question(String questionTitle, ArrayList<String> options, int correctIndex, String imagePath) {
+		this.questionTitle = questionTitle;
+		this.options = options;
+		this.correctIndex = correctIndex;
+		this.imagePath = imagePath;
+	}
 
-  public int getCorrect() {
-    return this.correctIndex;
-  }
+	public int getCorrect() {
+		return this.correctIndex;
+	}
 
-  public ArrayList<String> getOptions() {
-    return options;
-  }
+	public ArrayList<String> getOptions() {
+		return options;
+	}
 
-  public String getQuestionTitle() {
-    return this.questionTitle;
-  }
+	public String getQuestionTitle() {
+		return this.questionTitle;
+	}
 }
