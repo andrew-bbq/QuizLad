@@ -1,6 +1,5 @@
 package application;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
@@ -42,6 +42,11 @@ public class Main extends Application {
   @Override
   public void start(Stage primaryStage) {
     try {
+      // hard coded test topics
+      questionList.put("test1", null);
+      questionList.put("test2", null);
+      questionList.put("test3", null);
+      questionList.put("test4", null);
       // Creation of buttons and boxes
       Media sound = new Media(new File("open.mp3").toURI().toString());
       MediaPlayer mediaPlayer = new MediaPlayer(sound);
@@ -87,8 +92,16 @@ public class Main extends Application {
       }
     };
 
+    EventHandler<MouseEvent> MakeQuizSceneEvent = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        showStage(primaryStage, makeQuiz(primaryStage));
+      }
+    };
+
     // event buttons
     addNewQuestion.addEventFilter(MouseEvent.MOUSE_CLICKED, AddQuestionSceneEvent);
+    takeQuiz.addEventFilter(MouseEvent.MOUSE_CLICKED, MakeQuizSceneEvent);
 
     // Create comboBox with possible topics
     ObservableList<String> topicList = FXCollections.observableArrayList(questionList.keySet());
@@ -179,7 +192,7 @@ public class Main extends Application {
     optionI.setSelected(true);
     HBox.setMargin(optionI, new Insets(10, 0, 0, 0));
     TextField optionIText = new TextField();
-    optionIText.getStyleClass().addAll("basic-text");
+    optionIText.getStyleClass().addAll("custom-textfield", "basic-text");
     HBox.setMargin(optionIText, new Insets(0, 0, 5, 0));
     HBox toAdd = new HBox();
     toAdd.getChildren().addAll(optionI, optionIText);
@@ -196,12 +209,12 @@ public class Main extends Application {
     topicLabel.getStyleClass().addAll("basic-text");
     topicLabel.setFill(Color.rgb(13, 61, 137));
     HBox.setMargin(topicLabel, new Insets(5, 0, 0, 0));
-    topicText.getStyleClass().addAll("basic-text");
+    topicText.getStyleClass().addAll("custom-textfield", "basic-text");
     questionLabel.getStyleClass().addAll("basic-text");
     questionLabel.setFill(Color.rgb(13, 61, 137));
     HBox.setMargin(questionLabel, new Insets(5, 0, 0, 0));
     questionTitle.setMaxWidth(300);
-    questionTitle.getStyleClass().addAll("basic-text");
+    questionTitle.getStyleClass().addAll("custom-textfield", "basic-text");
     optionsLabel.getStyleClass().addAll("basic-text");
     optionsLabel.setFill(Color.rgb(13, 61, 137));
     addOption.getStyleClass().addAll("custom-button", "basic-text");
@@ -221,7 +234,7 @@ public class Main extends Application {
         optionI.setToggleGroup(optionSelector);
         HBox.setMargin(optionI, new Insets(10, 0, 0, 0));
         TextField optionIText = new TextField();
-        optionIText.getStyleClass().addAll("basic-text");
+        optionIText.getStyleClass().addAll("basic-text", "custom-textfield");
         HBox.setMargin(optionIText, new Insets(0, 0, 5, 0));
         HBox toAdd = new HBox();
         toAdd.getChildren().addAll(optionI, optionIText);
@@ -369,6 +382,83 @@ public class Main extends Application {
     hungryBox.getChildren().addAll(tryNewQuiz, spacer, returnHome);
     vungryBox.getChildren().addAll(finalScore, score, questionsAnswered, correctAnswers, hungryBox);
     Scene scene = new Scene(vungryBox, 800, 600);
+    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+    return scene;
+  }
+
+  public Scene makeQuiz(Stage primaryStage) {
+
+    VBox root = new VBox();
+    HBox header = new HBox();
+    HBox numQuestions = new HBox();
+    VBox topicList = new VBox();
+
+    Button back = new Button("Back to Home");
+    Text titleText = new Text("Take Quiz");
+    Text numQuestionsLabel = new Text("How many questions?");
+    TextField insertNum = new TextField();
+    Text topicLabel = new Text("Topics: ");
+    Button finish = new Button("Generate");
+
+    header.getChildren().addAll(back, titleText);
+    numQuestions.getChildren().addAll(numQuestionsLabel, insertNum);
+    topicList.getChildren().addAll(topicLabel);
+
+    for (String topic : questionList.keySet()) {
+      HBox toAdd = new HBox();
+      CheckBox addMe = new CheckBox();
+      HBox.setMargin(addMe, new Insets(5, 0, 0, 0));
+      Text currTopic = new Text(topic);
+      currTopic.getStyleClass().addAll("basic-text");
+      currTopic.setFill(Color.rgb(13, 61, 137));
+      toAdd.getChildren().addAll(addMe, currTopic);
+      topicList.getChildren().add(toAdd);
+    }
+
+    // event handlers
+    EventHandler<MouseEvent> BackToHomeEvent = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        showStage(primaryStage, home(primaryStage));
+      }
+    };
+
+    EventHandler<MouseEvent> Generate = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        // TEMP CALL, throw errors if none check or no integer in the text field
+        showStage(primaryStage, home(primaryStage));
+      }
+    };
+
+    // event calls
+    back.addEventFilter(MouseEvent.MOUSE_CLICKED, BackToHomeEvent);
+    finish.addEventFilter(MouseEvent.MOUSE_CLICKED, Generate);
+
+    // CSS
+    back.getStyleClass().addAll("custom-button", "basic-text");
+    HBox.setMargin(back, new Insets(8, 0, 0, 0));
+    titleText.getStyleClass().addAll("header-text");
+    titleText.setFill(Color.rgb(13, 61, 137));
+    HBox.setMargin(titleText, new Insets(0, 0, 0, 150));
+    numQuestionsLabel.getStyleClass().addAll("basic-text");
+    numQuestionsLabel.setFill(Color.rgb(13, 61, 137));
+    HBox.setMargin(numQuestionsLabel, new Insets(3, 5, 0, 0));
+
+    insertNum.getStyleClass().addAll("custom-textfield");
+    insertNum.setMaxWidth(50);
+    topicLabel.getStyleClass().addAll("basic-text");
+    topicLabel.setFill(Color.rgb(13, 61, 137));
+    finish.getStyleClass().addAll("custom-button", "basic-text");
+
+    header.setPadding(new Insets(10, 0, 10, 0));
+    numQuestions.setPadding(new Insets(0, 0, 10, 0));
+    topicList.setPadding(new Insets(0, 0, 20, 0));
+
+    root.getChildren().addAll(header, numQuestions, topicList, finish);
+    root.setPadding(new Insets(0, 0, 0, 20));
+
+    Scene scene = new Scene(root, 800, 600);
     scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
     return scene;
   }
