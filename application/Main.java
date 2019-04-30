@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -36,6 +37,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
   HashMap<String, ArrayList<Question>> questionList = new HashMap<String, ArrayList<Question>>();
+  Quiz quizObject = new Quiz();
 
   @Override
   public void start(Stage primaryStage) {
@@ -315,6 +317,58 @@ public class Main extends Application {
 
     Scene scene = new Scene(root, 800, 600);
 
+    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+    return scene;
+  }
+
+  public Scene finalScore(Stage primaryStage) {
+
+    // Set numQuestions for testing
+    quizObject.setNumQuestions(1);
+
+    // Get values from quiz
+    int numQuestions = quizObject.getNumQuestions();
+    int numAnswered = quizObject.getAnswered();
+    int numCorrect = quizObject.getCorrect();
+    int percentCorrect = numCorrect / numQuestions;
+
+    // Creation of buttons and boxes
+    VBox vungryBox = new VBox();
+    HBox hungryBox = new HBox();
+    Text finalScore = new Text("Final Score");
+    Text score = new Text(percentCorrect + "%");
+    Text questionsAnswered = new Text("You answered " + numAnswered + " questions");
+    Text correctAnswers = new Text("You got " + numCorrect + " answers correct");
+    Button tryNewQuiz = new Button("Try New Quiz");
+    Button returnHome = new Button("Return Home");
+
+    // CSS
+    tryNewQuiz.getStyleClass().addAll("custom-button", "basic-text");
+    returnHome.getStyleClass().addAll("custom-button", "basic-text");
+    finalScore.getStyleClass().addAll("header-text");
+    finalScore.setFont(Font.font("Letter Gothic"));
+    finalScore.setFill(Color.rgb(13, 61, 137));
+    score.getStyleClass().addAll("header-text");
+    score.setFont(Font.font("Letter Gothic"));
+    score.setFill(Color.rgb(137, 13, 37));
+    questionsAnswered.getStyleClass().addAll("basic-text");
+    questionsAnswered.setFont(Font.font("Letter Gothic"));
+    questionsAnswered.setFill(Color.rgb(13, 61, 137));
+    correctAnswers.getStyleClass().addAll("basic-text");
+    correctAnswers.setFont(Font.font("Letter Gothic"));
+    correctAnswers.setFill(Color.rgb(13, 61, 137));
+    final Pane spacer = new Pane();
+    spacer.setMinSize(10, 1);
+
+    // Align center
+    vungryBox.setAlignment(Pos.CENTER);
+    hungryBox.setAlignment(Pos.CENTER);
+    hungryBox.setPadding(new Insets(10, 10, 10, 10));
+
+    // Add all objects to scene and display
+    hungryBox.getChildren().addAll(tryNewQuiz, spacer, returnHome);
+    vungryBox.getChildren().addAll(finalScore, score, questionsAnswered, correctAnswers, hungryBox);
+    Scene scene = new Scene(vungryBox, 800, 600);
     scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
     return scene;
   }

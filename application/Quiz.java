@@ -38,4 +38,13 @@ public class Quiz {
     index++;
     return toReturn;
   }
+
+  public int getNumQuestions() {
+    return this.numQuestions;
+  }
+
+  // TEMP METHOD
+  public void setNumQuestions(int i) {
+    numQuestions = i;
+  }
 }
