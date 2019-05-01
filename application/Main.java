@@ -21,6 +21,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -37,6 +38,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
   HashMap<String, ArrayList<Question>> questionList = new HashMap<String, ArrayList<Question>>();
+  JSONHandler importExport = new JSONHandler("./writeme.json");
   Quiz quizObject = new Quiz();
 
   @Override
@@ -99,9 +101,17 @@ public class Main extends Application {
       }
     };
 
+    EventHandler<MouseEvent> ExportQuestions = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        importExport.generateJSON(questionList);
+      }
+    };
+
     // event buttons
     addNewQuestion.addEventFilter(MouseEvent.MOUSE_CLICKED, AddQuestionSceneEvent);
     takeQuiz.addEventFilter(MouseEvent.MOUSE_CLICKED, MakeQuizSceneEvent);
+    export.addEventFilter(MouseEvent.MOUSE_CLICKED, ExportQuestions);
 
     // Create comboBox with possible topics
     ObservableList<String> topicList = FXCollections.observableArrayList(questionList.keySet());
@@ -378,6 +388,25 @@ public class Main extends Application {
     hungryBox.setAlignment(Pos.CENTER);
     hungryBox.setPadding(new Insets(10, 10, 10, 10));
 
+    // event handlers
+    EventHandler<MouseEvent> GoHome = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        showStage(primaryStage, home(primaryStage));
+      }
+    };
+
+    EventHandler<MouseEvent> NewQuiz = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        showStage(primaryStage, makeQuiz(primaryStage));
+      }
+    };
+
+    // event buttons
+    tryNewQuiz.addEventFilter(MouseEvent.MOUSE_CLICKED, NewQuiz);
+    returnHome.addEventFilter(MouseEvent.MOUSE_CLICKED, GoHome);
+
     // Add all objects to scene and display
     hungryBox.getChildren().addAll(tryNewQuiz, spacer, returnHome);
     vungryBox.getChildren().addAll(finalScore, score, questionsAnswered, correctAnswers, hungryBox);
@@ -426,8 +455,13 @@ public class Main extends Application {
     EventHandler<MouseEvent> Generate = new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent e) {
-        // TEMP CALL, throw errors if none check or no integer in the text field
-        showStage(primaryStage, home(primaryStage));
+        ArrayList<String> testOptions = new ArrayList<String>();
+        testOptions.add("1");
+        testOptions.add("2");
+        testOptions.add("3");
+        testOptions.add("4");
+        Question test = new Question("test me", testOptions, 1, "");
+        showStage(primaryStage, quiz(primaryStage, test));
       }
     };
 
@@ -457,6 +491,84 @@ public class Main extends Application {
 
     root.getChildren().addAll(header, numQuestions, topicList, finish);
     root.setPadding(new Insets(0, 0, 0, 20));
+
+    Scene scene = new Scene(root, 800, 600);
+    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+    return scene;
+  }
+
+  public Scene quiz(Stage primaryStage, Question test) {
+
+    VBox root = new VBox();
+    HBox questionHeader = new HBox();
+    HBox questionTitleBox = new HBox();
+    HBox questionContent = new HBox();
+    VBox questionOptions = new VBox();
+    HBox submission = new HBox();
+
+    Button exitQuiz = new Button("Exit Quiz");
+    Text questionHead = new Text("Question ");
+    Text questionNum = new Text("1");
+    Text questionTitle = new Text("Testing question title here.");
+    ImageView image = new ImageView();
+    Button next = new Button("Submit");
+
+    final ToggleGroup optionSelector = new ToggleGroup();
+
+    for (String option : test.getOptions()) {
+      RadioButton optionI = new RadioButton();
+      optionI.setToggleGroup(optionSelector);
+      HBox.setMargin(optionI, new Insets(3, 0, 0, 0));
+      Text optionIText = new Text(option);
+      optionIText.getStyleClass().addAll("basic-text");
+      optionIText.setFill(Color.rgb(13, 61, 137));
+      HBox.setMargin(optionIText, new Insets(0, 0, 5, 0));
+      HBox toAdd = new HBox();
+      toAdd.getChildren().addAll(optionI, optionIText);
+      questionOptions.getChildren().addAll(toAdd);
+    }
+
+    root.getChildren().addAll(exitQuiz, questionHeader, questionTitleBox, questionContent,
+        submission);
+    questionHeader.getChildren().addAll(questionHead, questionNum);
+    questionTitleBox.getChildren().addAll(questionTitle);
+    questionContent.getChildren().addAll(image, questionOptions);
+    submission.getChildren().addAll(next);
+
+    // CSS
+    root.setPadding(new Insets(10, 0, 0, 10));
+    questionHeader.setAlignment(Pos.CENTER);
+    questionTitleBox.setAlignment(Pos.CENTER);
+    questionTitleBox.setPadding(new Insets(0, 0, 30, 0));
+    exitQuiz.getStyleClass().addAll("custom-button", "basic-text");
+    next.getStyleClass().addAll("custom-button", "basic-text");
+    submission.setAlignment(Pos.BOTTOM_RIGHT);
+    submission.setPadding(new Insets(0, 50, 50, 0));
+    questionHead.getStyleClass().addAll("header-text");
+    questionHead.setFill(Color.rgb(13, 61, 137));
+    questionNum.getStyleClass().addAll("header-text");
+    questionNum.setFill(Color.rgb(13, 61, 137));
+    questionTitle.getStyleClass().addAll("basic-text");
+    questionTitle.setFill(Color.rgb(13, 61, 137));
+
+    // event handlers
+    EventHandler<MouseEvent> CheckQuestion = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        showStage(primaryStage, quiz(primaryStage, test));
+      }
+    };
+
+    EventHandler<MouseEvent> ExitQuiz = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        showStage(primaryStage, finalScore(primaryStage));
+      }
+    };
+
+    // button events
+    next.addEventFilter(MouseEvent.MOUSE_CLICKED, CheckQuestion);
+    exitQuiz.addEventFilter(MouseEvent.MOUSE_CLICKED, ExitQuiz);
 
     Scene scene = new Scene(root, 800, 600);
     scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());

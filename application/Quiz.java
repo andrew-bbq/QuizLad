@@ -43,6 +43,10 @@ public class Quiz {
     return this.numQuestions;
   }
 
+  public int getIndex() {
+    return index;
+  }
+
   // TEMP METHOD
   public void setNumQuestions(int i) {
     numQuestions = i;
