@@ -40,17 +40,12 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
   HashMap<String, ArrayList<Question>> questionList = new HashMap<String, ArrayList<Question>>();
-  JSONHandler importExport = new JSONHandler("./writeme.json");
+  JSONHandler importExport = new JSONHandler();
   Quiz quizObject = new Quiz();
 
   @Override
   public void start(Stage primaryStage) {
     try {
-      // hard coded test topics
-      questionList.put("test1", null);
-      questionList.put("test2", null);
-      questionList.put("test3", null);
-      questionList.put("test4", null);
       // Creation of buttons and boxes
       Media sound = new Media(new File("open.mp3").toURI().toString());
       MediaPlayer mediaPlayer = new MediaPlayer(sound);
@@ -73,6 +68,8 @@ public class Main extends Application {
   }
 
   public Scene home(Stage primaryStage) {
+
+    final FileChooser fc = new FileChooser();
     // Creation of buttons and boxes
     VBox vungryBox = new VBox();
     HBox hungryBox1 = new HBox();
@@ -106,7 +103,22 @@ public class Main extends Application {
     EventHandler<MouseEvent> ExportQuestions = new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent e) {
-        importExport.generateJSON(questionList);
+        File file = fc.showSaveDialog(primaryStage);
+        importExport.generateJSON(questionList, file.getAbsolutePath().toString());
+      }
+    };
+
+    EventHandler<MouseEvent> ImportJSONEvent = new EventHandler<MouseEvent>() {
+      @Override
+      public void handle(MouseEvent e) {
+        File file = fc.showOpenDialog(primaryStage);
+        try {
+          questionList =
+              importExport.addQuestions(questionList, file.getCanonicalPath().toString());
+          showStage(primaryStage, home(primaryStage));
+        } catch (IOException e1) {
+          e1.printStackTrace();
+        }
       }
     };
 
@@ -114,6 +126,7 @@ public class Main extends Application {
     addNewQuestion.addEventFilter(MouseEvent.MOUSE_CLICKED, AddQuestionSceneEvent);
     takeQuiz.addEventFilter(MouseEvent.MOUSE_CLICKED, MakeQuizSceneEvent);
     export.addEventFilter(MouseEvent.MOUSE_CLICKED, ExportQuestions);
+    importBooks.addEventFilter(MouseEvent.MOUSE_CLICKED, ImportJSONEvent);
 
     // Create comboBox with possible topics
     ObservableList<String> topicList = FXCollections.observableArrayList(questionList.keySet());
