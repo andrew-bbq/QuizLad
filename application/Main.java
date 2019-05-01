@@ -46,7 +46,9 @@ public class Main extends Application {
 	HashMap<String, ArrayList<Question>> questionList = new HashMap<String, ArrayList<Question>>();
 	JSONHandler importExport = new JSONHandler();
 	Quiz quizObject = new Quiz();
+
 	final FileChooser fc = new FileChooser();
+
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -61,6 +63,7 @@ public class Main extends Application {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			public void handle(WindowEvent exitApp) {
@@ -95,6 +98,13 @@ public class Main extends Application {
 
 	public Scene home(Stage primaryStage) {
 
+		int size = 0;
+		for (String key : questionList.keySet())
+			size += questionList.get(key).size();
+		
+		
+		final FileChooser fc = new FileChooser();
+
 		// Creation of buttons and boxes
 		VBox vungryBox = new VBox();
 		HBox hungryBox1 = new HBox();
@@ -106,8 +116,8 @@ public class Main extends Application {
 		Button addNewQuestion = new Button("Add New Question");
 		Button importBooks = new Button("Import JSON");
 		Button export = new Button("Export");
-		TextField numQuestions = new TextField();
-		Text placeHolderNum = new Text("Number of Questions: ");
+
+		Text placeHolderNum = new Text("Number of Questions: " + size);
 
 		// event handling
 		EventHandler<MouseEvent> AddQuestionSceneEvent = new EventHandler<MouseEvent>() {
@@ -168,8 +178,8 @@ public class Main extends Application {
 			}
 		}
 		ListView<String> list = new ListView<String>(questionTitles);
+		
 
-		numQuestions.setMaxWidth(50);
 		takeQuiz.getStyleClass().addAll("custom-button", "basic-text");
 		addNewQuestion.getStyleClass().addAll("custom-button", "basic-text");
 		importBooks.getStyleClass().addAll("custom-button", "basic-text");
@@ -178,7 +188,6 @@ public class Main extends Application {
 		placeHolderNum.getStyleClass().addAll("basic-text");
 		placeHolderNum.setFont(Font.font("Letter Gothic"));
 		placeHolderNum.setFill(Color.rgb(13, 61, 137));
-		numQuestions.getStyleClass().addAll("custom-textfield");
 		list.getStyleClass().addAll("custom-list", "basic-text");
 		topicLabel.getStyleClass().addAll("basic-text", "text-padding-top");
 		topicLabel.setFill(Color.rgb(13, 61, 137));
@@ -200,7 +209,8 @@ public class Main extends Application {
 		// Add all objects to scene and display
 		hungryBox1.getChildren().addAll(topicLabel, topics, spacer, takeQuiz);
 		hungryBox2.getChildren().addAll(addNewQuestion, spacer2, importBooks, export);
-		hungryBox3.getChildren().addAll(placeHolderNum, numQuestions);
+
+		hungryBox3.getChildren().addAll(placeHolderNum);
 		vungryBox.getChildren().addAll(hungryBox1, hungryBox2, hungryBox3, list);
 		Scene scene = new Scene(vungryBox, 800, 600);
 		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
