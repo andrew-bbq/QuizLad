@@ -1,5 +1,6 @@
 package application;
 
+import javafx.scene.control.ScrollPane;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
@@ -173,6 +175,7 @@ public class Main extends Application {
 
     FileChooser fileChooser = new FileChooser();
     String imagePath = "";
+    ScrollPane scroller = new ScrollPane();
 
     VBox root = new VBox();
     HBox header = new HBox();
@@ -193,6 +196,7 @@ public class Main extends Application {
     Button removeOption = new Button("-Remove Choice");
     Text imageLabel = new Text("Photo (Optional): ");
     Button addImage = new Button("Choose File");
+    Text fileName = new Text();
     Button finish = new Button("Add Question");
 
     final ToggleGroup optionSelector = new ToggleGroup();
@@ -235,6 +239,7 @@ public class Main extends Application {
     HBox.setMargin(imageLabel, new Insets(6, 0, 0, 0));
     addImage.getStyleClass().addAll("custom-button", "basic-text");
     finish.getStyleClass().addAll("custom-button", "basic-text");
+    HBox.setMargin(fileName, new Insets(10, 0, 0, 10));
 
     // event methods
     EventHandler<MouseEvent> AddQuestionEvent = new EventHandler<MouseEvent>() {
@@ -276,9 +281,7 @@ public class Main extends Application {
         File file = fileChooser.showOpenDialog(primaryStage);
         if (file != null) {
           try {
-            Text fileName = new Text(file.getCanonicalPath().toString());
-            HBox.setMargin(fileName, new Insets(10, 0, 0, 10));
-            bot.getChildren().add(fileName);
+            fileName.setText(file.getCanonicalPath().toString());
           } catch (IOException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -290,7 +293,7 @@ public class Main extends Application {
     EventHandler<MouseEvent> Finalize = new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent e) {
-
+        int correctIndex = -1;
         Alert failure = new Alert(AlertType.ERROR);
         failure.setHeaderText("Invalid Question Parameters");
         if (topicText.getText() == null || topicText.getText().trim().isEmpty()) {
@@ -307,15 +310,36 @@ public class Main extends Application {
             failure.setContentText("You have typed in an invalid question choice");
             break;
           }
+          if (((RadioButton) ((HBox) radioButtons.getChildren().get(i)).getChildren().get(0))
+              .isSelected() == true) {
+            correctIndex = i;
+          }
+        }
+        if (correctIndex == -1) {
+          failure.setContentText("You must select a correct answer");
         }
         if (failure.getContentText().equals("")) {
+          String topic = topicText.getText().toString().toLowerCase();
+          ArrayList<String> choices = new ArrayList<String>();
+          for (int i = 0; i < radioButtons.getChildren().size(); i++) {
+            choices
+                .add(((TextField) ((HBox) radioButtons.getChildren().get(i)).getChildren().get(1))
+                    .getText().toString());
+          }
+          String imagePath = fileName.getText().toString();
+          Question toAdd = new Question(topic, choices, correctIndex, imagePath);
+          if (questionList.keySet().contains(topic)) {
+            questionList.get(topic).add(toAdd);
+          } else {
+            questionList.put(topic, new ArrayList<Question>());
+            questionList.get(topic).add(toAdd);
+          }
           showStage(primaryStage, home(primaryStage));
         } else {
           failure.showAndWait();
         }
       }
     };
-
 
     // Event Handling
     addOption.addEventFilter(MouseEvent.MOUSE_CLICKED, AddQuestionEvent);
@@ -324,6 +348,7 @@ public class Main extends Application {
     removeOption.addEventFilter(MouseEvent.MOUSE_CLICKED, RemoveOptionEvent);
     finish.addEventFilter(MouseEvent.MOUSE_CLICKED, Finalize);
 
+    // spacing
     header.getChildren().addAll(back, title);
     header.setPadding(new Insets(0, 0, 20, 0));
     topic.getChildren().addAll(topicLabel, topicText);
@@ -332,13 +357,18 @@ public class Main extends Application {
     top.setPadding(new Insets(0, 0, 20, 0));
     center.getChildren().addAll(optionsLabel, radioButtons, new HBox(addOption, removeOption));
     center.setPadding(new Insets(0, 0, 20, 0));
-    bot.getChildren().addAll(imageLabel, addImage);
+    bot.getChildren().addAll(imageLabel, addImage, fileName);
     bot.setPadding(new Insets(0, 0, 40, 0));
 
     root.getChildren().addAll(header, topic, top, center, bot, finish);
     root.setPadding(new Insets(0, 0, 0, 20));
 
-    Scene scene = new Scene(root, 800, 600);
+    // scroll bar policies
+    scroller.setContent(root);
+    scroller.setHbarPolicy(ScrollBarPolicy.NEVER);
+    scroller.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
+
+    Scene scene = new Scene(scroller, 800, 600);
 
     scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
     return scene;
@@ -516,16 +546,12 @@ public class Main extends Application {
     final ToggleGroup optionSelector = new ToggleGroup();
 
     for (String option : test.getOptions()) {
-      RadioButton optionI = new RadioButton();
+      RadioButton optionI = new RadioButton(option);
       optionI.setToggleGroup(optionSelector);
       HBox.setMargin(optionI, new Insets(3, 0, 0, 0));
-      Text optionIText = new Text(option);
-      optionIText.getStyleClass().addAll("basic-text");
-      optionIText.setFill(Color.rgb(13, 61, 137));
-      HBox.setMargin(optionIText, new Insets(0, 0, 5, 0));
-      HBox toAdd = new HBox();
-      toAdd.getChildren().addAll(optionI, optionIText);
-      questionOptions.getChildren().addAll(toAdd);
+      optionI.getStyleClass().addAll("basic-text");
+      optionI.setTextFill(Color.rgb(13, 61, 137));
+      questionOptions.getChildren().addAll(optionI);
     }
 
     root.getChildren().addAll(exitQuiz, questionHeader, questionTitleBox, questionContent,
