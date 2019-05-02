@@ -618,10 +618,9 @@ public class Main extends Application {
     Text questionTitle = new Text(test.getQuestionTitle());
     ImageView image = new ImageView();
     try {
-      Image check = new Image("file:" + test.getImage(), 200, 200, true, true);
+      Image check = new Image("file:" + test.getImage(), 250, 250, true, true);
       image.setImage(check);
     } catch (Exception e) {
-      System.out.println();
       // don't populate the image
     }
     Button next = new Button("Submit");
@@ -663,7 +662,6 @@ public class Main extends Application {
     nextQuestion.getStyleClass().addAll("basic-text", "custom-button");
     HBox.setMargin(image, new Insets(0, 30, 0, 0));
     image.setPreserveRatio(true);
-    image.setFitWidth(250);
 
     // event handlers
     EventHandler<MouseEvent> CheckQuestion = new EventHandler<MouseEvent>() {
