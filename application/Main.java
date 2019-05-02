@@ -1,5 +1,6 @@
 package application;
 
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,6 +9,8 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -99,8 +102,9 @@ public class Main extends Application {
 	public Scene home(Stage primaryStage) {
 
 		int size = 0;
-		for (String key : questionList.keySet())
+		for (String key : questionList.keySet()) {
 			size += questionList.get(key).size();
+		}
 		
 		
 		final FileChooser fc = new FileChooser();
@@ -160,6 +164,7 @@ public class Main extends Application {
 		takeQuiz.addEventFilter(MouseEvent.MOUSE_CLICKED, MakeQuizSceneEvent);
 		export.addEventFilter(MouseEvent.MOUSE_CLICKED, ExportQuestions);
 		importBooks.addEventFilter(MouseEvent.MOUSE_CLICKED, ImportJSONEvent);
+		
 
 		// Create comboBox with possible topics
 		ObservableList<String> topicList = FXCollections.observableArrayList(questionList.keySet());
@@ -168,17 +173,19 @@ public class Main extends Application {
 		topics.setItems(topicList);
 		if (!topicList.isEmpty())
 			topics.getSelectionModel().selectFirst();
-
+		
 		// Display questions for default topic
 		ArrayList<Question> topicQuestions = questionList.get(topics.getValue());
 		ObservableList<String> questionTitles = FXCollections.observableArrayList();
 		if (topicQuestions != null) {
-			for (Question q : topicQuestions) {
-				questionTitles.add(q.getQuestionTitle());
+			for(String key : questionList.keySet()) {
+			for (Question question : questionList.get(key)) {
+				questionTitles.add(key + " - " + question.getQuestionTitle());
 			}
 		}
+		}
 		ListView<String> list = new ListView<String>(questionTitles);
-		
+	
 
 		takeQuiz.getStyleClass().addAll("custom-button", "basic-text");
 		addNewQuestion.getStyleClass().addAll("custom-button", "basic-text");
@@ -364,6 +371,7 @@ public class Main extends Application {
 					failure.setContentText("You must select a correct answer");
 				}
 				if (failure.getContentText().equals("")) {
+					String questionT = questionTitle.getText().toString();
 					String topic = topicText.getText().toString().toLowerCase();
 					ArrayList<String> choices = new ArrayList<String>();
 					for (int i = 0; i < radioButtons.getChildren().size(); i++) {
@@ -371,7 +379,7 @@ public class Main extends Application {
 								.getText().toString());
 					}
 					String imagePath = fileName.getText().toString();
-					Question toAdd = new Question(topic, choices, correctIndex, imagePath);
+					Question toAdd = new Question(questionT, choices, correctIndex, imagePath);
 					if (questionList.keySet().contains(topic)) {
 						questionList.get(topic).add(toAdd);
 					} else {
