@@ -497,87 +497,101 @@ public class Main extends Application {
 		return scene;
 	}
 
-	public Scene makeQuiz(Stage primaryStage) {
+	  public Scene makeQuiz(Stage primaryStage) {
 
-		VBox root = new VBox();
-		HBox header = new HBox();
-		HBox numQuestions = new HBox();
-		VBox topicList = new VBox();
+	    VBox root = new VBox();
+	    HBox header = new HBox();
+	    HBox numQuestions = new HBox();
+	    VBox topicList = new VBox();
 
-		Button back = new Button("Back to Home");
-		Text titleText = new Text("Take Quiz");
-		Text numQuestionsLabel = new Text("How many questions?");
-		TextField insertNum = new TextField();
-		Text topicLabel = new Text("Topics: ");
-		Button finish = new Button("Generate");
+	    Button back = new Button("Back to Home");
+	    Text titleText = new Text("Take Quiz");
+	    Text numQuestionsLabel = new Text("How many questions?");
+	    TextField insertNum = new TextField();
+	    Text topicLabel = new Text("Topics: ");
+	    Button finish = new Button("Generate");
 
-		header.getChildren().addAll(back, titleText);
-		numQuestions.getChildren().addAll(numQuestionsLabel, insertNum);
-		topicList.getChildren().addAll(topicLabel);
+	    header.getChildren().addAll(back, titleText);
+	    numQuestions.getChildren().addAll(numQuestionsLabel, insertNum);
+	    topicList.getChildren().addAll(topicLabel);
 
-		for (String topic : questionList.keySet()) {
-			HBox toAdd = new HBox();
-			CheckBox addMe = new CheckBox();
-			HBox.setMargin(addMe, new Insets(5, 0, 0, 0));
-			Text currTopic = new Text(topic);
-			currTopic.getStyleClass().addAll("basic-text");
-			currTopic.setFill(Color.rgb(13, 61, 137));
-			toAdd.getChildren().addAll(addMe, currTopic);
-			topicList.getChildren().add(toAdd);
-		}
+	    for (String topic : questionList.keySet()) {
+	      CheckBox addMe = new CheckBox(topic);
+	      HBox.setMargin(addMe, new Insets(5, 0, 0, 0));
+	      addMe.getStyleClass().addAll("basic-text");
+	      addMe.setTextFill(Color.rgb(13, 61, 137));
+	      topicList.getChildren().add(addMe);
+	    }
 
-		// event handlers
-		EventHandler<MouseEvent> BackToHomeEvent = new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent e) {
-				showStage(primaryStage, home(primaryStage));
-			}
-		};
+	    // event handlers
+	    EventHandler<MouseEvent> BackToHomeEvent = new EventHandler<MouseEvent>() {
+	      @Override
+	      public void handle(MouseEvent e) {
+	        showStage(primaryStage, home(primaryStage));
+	      }
+	    };
 
-		EventHandler<MouseEvent> Generate = new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent e) {
-				ArrayList<String> testOptions = new ArrayList<String>();
-				testOptions.add("1");
-				testOptions.add("2");
-				testOptions.add("3");
-				testOptions.add("4");
-				Question test = new Question("test me", testOptions, 1, "");
-				showStage(primaryStage, quiz(primaryStage, test));
-			}
-		};
+	    EventHandler<MouseEvent> Generate = new EventHandler<MouseEvent>() {
+	      @Override
+	      public void handle(MouseEvent e) {
+	        Alert fail = new Alert(AlertType.ERROR);
+	        fail.setHeaderText("Invalid Information");
+	        ArrayList<String> selectedTopics = new ArrayList<String>();
+	        for (int i = 1; i < topicList.getChildren().size(); i++) {
+	          if (((CheckBox) topicList.getChildren().get(i)).isSelected()) {
+	            selectedTopics.add(((CheckBox) topicList.getChildren().get(i)).getText());
+	          }
+	        }
+	        if (selectedTopics.size() == 0) {
+	          fail.setContentText("No topics have been selected");
+	        }
+	        try {
+	          if (fail.getContentText().equals("")) {
+	            int numQuestions = Integer.parseInt(insertNum.getText());
+	            GenerateQuiz generation = new GenerateQuiz(numQuestions, selectedTopics);
+	            quizObject = generation.generate(questionList);
+	            showStage(primaryStage, quiz(primaryStage, quizObject.getQuestion()));
+	          } else {
+	            fail.showAndWait();
+	          }
+	        } catch (Exception exception) {
+	          fail.setContentText("A valid number wasn't typed in");
+	          fail.showAndWait();
+	        }
+	      }
+	    };
 
-		// event calls
-		back.addEventFilter(MouseEvent.MOUSE_CLICKED, BackToHomeEvent);
-		finish.addEventFilter(MouseEvent.MOUSE_CLICKED, Generate);
+	    // event calls
+	    back.addEventFilter(MouseEvent.MOUSE_CLICKED, BackToHomeEvent);
+	    finish.addEventFilter(MouseEvent.MOUSE_CLICKED, Generate);
 
-		// CSS
-		back.getStyleClass().addAll("custom-button", "basic-text");
-		HBox.setMargin(back, new Insets(8, 0, 0, 0));
-		titleText.getStyleClass().addAll("header-text");
-		titleText.setFill(Color.rgb(13, 61, 137));
-		HBox.setMargin(titleText, new Insets(0, 0, 0, 150));
-		numQuestionsLabel.getStyleClass().addAll("basic-text");
-		numQuestionsLabel.setFill(Color.rgb(13, 61, 137));
-		HBox.setMargin(numQuestionsLabel, new Insets(3, 5, 0, 0));
+	    // CSS
+	    back.getStyleClass().addAll("custom-button", "basic-text");
+	    HBox.setMargin(back, new Insets(8, 0, 0, 0));
+	    titleText.getStyleClass().addAll("header-text");
+	    titleText.setFill(Color.rgb(13, 61, 137));
+	    HBox.setMargin(titleText, new Insets(0, 0, 0, 150));
+	    numQuestionsLabel.getStyleClass().addAll("basic-text");
+	    numQuestionsLabel.setFill(Color.rgb(13, 61, 137));
+	    HBox.setMargin(numQuestionsLabel, new Insets(3, 5, 0, 0));
 
-		insertNum.getStyleClass().addAll("custom-textfield");
-		insertNum.setMaxWidth(50);
-		topicLabel.getStyleClass().addAll("basic-text");
-		topicLabel.setFill(Color.rgb(13, 61, 137));
-		finish.getStyleClass().addAll("custom-button", "basic-text");
+	    insertNum.getStyleClass().addAll("custom-textfield");
+	    insertNum.setMaxWidth(50);
+	    topicLabel.getStyleClass().addAll("basic-text");
+	    topicLabel.setFill(Color.rgb(13, 61, 137));
+	    finish.getStyleClass().addAll("custom-button", "basic-text");
 
-		header.setPadding(new Insets(10, 0, 10, 0));
-		numQuestions.setPadding(new Insets(0, 0, 10, 0));
-		topicList.setPadding(new Insets(0, 0, 20, 0));
+	    header.setPadding(new Insets(10, 0, 10, 0));
+	    numQuestions.setPadding(new Insets(0, 0, 10, 0));
+	    topicList.setPadding(new Insets(0, 0, 20, 0));
 
-		root.getChildren().addAll(header, numQuestions, topicList, finish);
-		root.setPadding(new Insets(0, 0, 0, 20));
+	    root.getChildren().addAll(header, numQuestions, topicList, finish);
+	    root.setPadding(new Insets(0, 0, 0, 20));
 
-		Scene scene = new Scene(root, 800, 600);
-		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-		return scene;
-	}
+	    Scene scene = new Scene(root, 800, 600);
+	    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+	    return scene;
+	  }
 
 	public Scene quiz(Stage primaryStage, Question test) {
 
