@@ -612,7 +612,7 @@ public class Main extends Application {
 
 		Button exitQuiz = new Button("Exit Quiz");
 		Text questionHead = new Text("Question ");
-		Text questionNum = new Text("" + quizObject.getIndex());
+		Text questionNum = new Text("" + quizObject.getIndex() + " of " + quizObject.getNumQuestions());
 		Text questionTitle = new Text(test.getQuestionTitle());
 		ImageView image = new ImageView();
 		try {
