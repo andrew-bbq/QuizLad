@@ -78,8 +78,12 @@ public class Main extends Application {
 
         }
         if (result.get() == ButtonType.YES) {
-          File file = fc.showSaveDialog(primaryStage);
-          importExport.generateJSON(questionList, file.getAbsolutePath().toString());
+          try {
+            File file = fc.showSaveDialog(primaryStage);
+            importExport.generateJSON(questionList, file.getAbsolutePath().toString());
+          } catch (Exception ex) {
+
+          }
         } else if (result.get() == ButtonType.NO) {
 
         }
@@ -103,8 +107,6 @@ public class Main extends Application {
     for (String key : questionList.keySet()) {
       size += questionList.get(key).size();
     }
-
-    final FileChooser fc = new FileChooser();
 
     // Creation of buttons and boxes
     VBox vungryBox = new VBox();
@@ -138,21 +140,25 @@ public class Main extends Application {
     EventHandler<MouseEvent> ExportQuestions = new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent e) {
-        File file = fc.showSaveDialog(primaryStage);
-        importExport.generateJSON(questionList, file.getAbsolutePath().toString());
+        try {
+          File file = fc.showSaveDialog(primaryStage);
+          importExport.generateJSON(questionList, file.getAbsolutePath().toString());
+        } catch (Exception ex) {
+
+        }
       }
     };
 
     EventHandler<MouseEvent> ImportJSONEvent = new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent e) {
-        File file = fc.showOpenDialog(primaryStage);
         try {
+          File file = fc.showOpenDialog(primaryStage);
           questionList =
               importExport.addQuestions(questionList, file.getCanonicalPath().toString());
           showStage(primaryStage, home(primaryStage));
-        } catch (IOException e1) {
-          e1.printStackTrace();
+        } catch (Exception ex) {
+          
         }
       }
     };
@@ -237,7 +243,6 @@ public class Main extends Application {
 
   public Scene addQuestion(Stage primaryStage) {
 
-    FileChooser fileChooser = new FileChooser();
     String imagePath = "";
     ScrollPane scroller = new ScrollPane();
 
@@ -342,14 +347,18 @@ public class Main extends Application {
     EventHandler<MouseEvent> AddImageEvent = new EventHandler<MouseEvent>() {
       @Override
       public void handle(MouseEvent e) {
-        File file = fileChooser.showOpenDialog(primaryStage);
-        if (file != null) {
-          try {
-            fileName.setText(file.getCanonicalPath().toString());
-          } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        try {
+          File file = fc.showOpenDialog(primaryStage);
+          if (file != null) {
+            try {
+              fileName.setText(file.getCanonicalPath().toString());
+            } catch (IOException e1) {
+              // TODO Auto-generated catch block
+              e1.printStackTrace();
+            }
           }
+        } catch (Exception ex) {
+          // don't do anything
         }
       }
     };

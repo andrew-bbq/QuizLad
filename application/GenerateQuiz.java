@@ -22,6 +22,6 @@ public class GenerateQuiz {
     Collections.shuffle(allQuestions);
     ArrayList<Question> quizQuestions = (ArrayList<Question>) allQuestions.stream()
         .limit((long) numQuestions).collect(Collectors.toList());
-    return new Quiz(numQuestions, quizQuestions);
+    return new Quiz(quizQuestions.size(), quizQuestions);
   }
 }
