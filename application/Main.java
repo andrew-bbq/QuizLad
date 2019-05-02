@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -47,9 +49,9 @@ public class Main extends Application {
 	HashMap<String, ArrayList<Question>> questionList = new HashMap<String, ArrayList<Question>>();
 	JSONHandler importExport = new JSONHandler();
 	Quiz quizObject = new Quiz();
+	ListView<String> list = new ListView<String>();
 
 	final FileChooser fc = new FileChooser();
-
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -65,7 +67,6 @@ public class Main extends Application {
 			e.printStackTrace();
 		}
 
-
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			public void handle(WindowEvent exitApp) {
 				Alert alert = new Alert(AlertType.INFORMATION,
@@ -75,12 +76,13 @@ public class Main extends Application {
 				alert.setContentText("Do you want to save your questions to a JSON?");
 				Optional<ButtonType> result = alert.showAndWait();
 				if (result.isPresent()) {
-					
-				} if (result.get() == ButtonType.YES) {
+
+				}
+				if (result.get() == ButtonType.YES) {
 					File file = fc.showSaveDialog(primaryStage);
 					importExport.generateJSON(questionList, file.getAbsolutePath().toString());
 				} else if (result.get() == ButtonType.NO) {
-					
+
 				}
 			}
 		});
@@ -102,8 +104,7 @@ public class Main extends Application {
 		for (String key : questionList.keySet()) {
 			size += questionList.get(key).size();
 		}
-		
-		
+
 		final FileChooser fc = new FileChooser();
 
 		// Creation of buttons and boxes
@@ -161,7 +162,6 @@ public class Main extends Application {
 		takeQuiz.addEventFilter(MouseEvent.MOUSE_CLICKED, MakeQuizSceneEvent);
 		export.addEventFilter(MouseEvent.MOUSE_CLICKED, ExportQuestions);
 		importBooks.addEventFilter(MouseEvent.MOUSE_CLICKED, ImportJSONEvent);
-		
 
 		// Create comboBox with possible topics
 		ObservableList<String> topicList = FXCollections.observableArrayList(questionList.keySet());
@@ -170,20 +170,34 @@ public class Main extends Application {
 		topics.setItems(topicList);
 		if (!topicList.isEmpty())
 			topics.getSelectionModel().selectFirst();
-		
+
 		// Display questions for default topic
 		ArrayList<Question> topicQuestions = questionList.get(topics.getValue());
 		ObservableList<String> questionTitles = FXCollections.observableArrayList();
 		if (topicQuestions != null) {
-			for(String key : questionList.keySet()) {
-			for (Question question : questionList.get(key)) {
-				questionTitles.add(key + " - " + question.getQuestionTitle());
+			for (Question q : topicQuestions) {
+				questionTitles.add(q.getQuestionTitle());
 			}
 		}
-		}
-		ListView<String> list = new ListView<String>(questionTitles);
-	
+		list = new ListView<String>(questionTitles);
 
+		// Make a listener attached to the comboBox
+		topics.valueProperty().addListener(new ChangeListener<Object>() {
+			// Modify the changed method to update all this garbage
+			public void changed(ObservableValue<?> obv, Object oldVal, Object newVal) {
+				ArrayList<Question> topicQuestions = questionList.get(newVal);
+				ObservableList<String> questionTitles = FXCollections.observableArrayList();
+				if (topicQuestions != null) {
+					for (Question q : topicQuestions) {
+						questionTitles.add(q.getQuestionTitle());
+
+					}
+					// Update ListView field
+					list.setItems(questionTitles);
+				}
+			}
+		});
+		
 		takeQuiz.getStyleClass().addAll("custom-button", "basic-text");
 		addNewQuestion.getStyleClass().addAll("custom-button", "basic-text");
 		importBooks.getStyleClass().addAll("custom-button", "basic-text");
@@ -436,8 +450,8 @@ public class Main extends Application {
 		HBox hungryBox = new HBox();
 		Text finalScore = new Text("Final Score");
 		Text score = new Text((Math.round(percentCorrect * 100) / 100) + "%");
-		Text questionsAnswered = new Text("You answered " + (int)numAnswered + " questions");
-		Text correctAnswers = new Text("You got " + (int)numCorrect + " answers correct");
+		Text questionsAnswered = new Text("You answered " + (int) numAnswered + " questions");
+		Text correctAnswers = new Text("You got " + (int) numCorrect + " answers correct");
 		Button tryNewQuiz = new Button("Try New Quiz");
 		Button returnHome = new Button("Return Home");
 
@@ -491,101 +505,101 @@ public class Main extends Application {
 		return scene;
 	}
 
-	  public Scene makeQuiz(Stage primaryStage) {
+	public Scene makeQuiz(Stage primaryStage) {
 
-	    VBox root = new VBox();
-	    HBox header = new HBox();
-	    HBox numQuestions = new HBox();
-	    VBox topicList = new VBox();
+		VBox root = new VBox();
+		HBox header = new HBox();
+		HBox numQuestions = new HBox();
+		VBox topicList = new VBox();
 
-	    Button back = new Button("Back to Home");
-	    Text titleText = new Text("Take Quiz");
-	    Text numQuestionsLabel = new Text("How many questions?");
-	    TextField insertNum = new TextField();
-	    Text topicLabel = new Text("Topics: ");
-	    Button finish = new Button("Generate");
+		Button back = new Button("Back to Home");
+		Text titleText = new Text("Take Quiz");
+		Text numQuestionsLabel = new Text("How many questions?");
+		TextField insertNum = new TextField();
+		Text topicLabel = new Text("Topics: ");
+		Button finish = new Button("Generate");
 
-	    header.getChildren().addAll(back, titleText);
-	    numQuestions.getChildren().addAll(numQuestionsLabel, insertNum);
-	    topicList.getChildren().addAll(topicLabel);
+		header.getChildren().addAll(back, titleText);
+		numQuestions.getChildren().addAll(numQuestionsLabel, insertNum);
+		topicList.getChildren().addAll(topicLabel);
 
-	    for (String topic : questionList.keySet()) {
-	      CheckBox addMe = new CheckBox(topic);
-	      HBox.setMargin(addMe, new Insets(5, 0, 0, 0));
-	      addMe.getStyleClass().addAll("basic-text");
-	      addMe.setTextFill(Color.rgb(13, 61, 137));
-	      topicList.getChildren().add(addMe);
-	    }
+		for (String topic : questionList.keySet()) {
+			CheckBox addMe = new CheckBox(topic);
+			HBox.setMargin(addMe, new Insets(5, 0, 0, 0));
+			addMe.getStyleClass().addAll("basic-text");
+			addMe.setTextFill(Color.rgb(13, 61, 137));
+			topicList.getChildren().add(addMe);
+		}
 
-	    // event handlers
-	    EventHandler<MouseEvent> BackToHomeEvent = new EventHandler<MouseEvent>() {
-	      @Override
-	      public void handle(MouseEvent e) {
-	        showStage(primaryStage, home(primaryStage));
-	      }
-	    };
+		// event handlers
+		EventHandler<MouseEvent> BackToHomeEvent = new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent e) {
+				showStage(primaryStage, home(primaryStage));
+			}
+		};
 
-	    EventHandler<MouseEvent> Generate = new EventHandler<MouseEvent>() {
-	      @Override
-	      public void handle(MouseEvent e) {
-	        Alert fail = new Alert(AlertType.ERROR);
-	        fail.setHeaderText("Invalid Information");
-	        ArrayList<String> selectedTopics = new ArrayList<String>();
-	        for (int i = 1; i < topicList.getChildren().size(); i++) {
-	          if (((CheckBox) topicList.getChildren().get(i)).isSelected()) {
-	            selectedTopics.add(((CheckBox) topicList.getChildren().get(i)).getText());
-	          }
-	        }
-	        if (selectedTopics.size() == 0) {
-	          fail.setContentText("No topics have been selected");
-	        }
-	        try {
-	          if (fail.getContentText().equals("")) {
-	            int numQuestions = Integer.parseInt(insertNum.getText());
-	            GenerateQuiz generation = new GenerateQuiz(numQuestions, selectedTopics);
-	            quizObject = generation.generate(questionList);
-	            showStage(primaryStage, quiz(primaryStage, quizObject.getQuestion()));
-	          } else {
-	            fail.showAndWait();
-	          }
-	        } catch (Exception exception) {
-	          fail.setContentText("A valid number wasn't typed in");
-	          fail.showAndWait();
-	        }
-	      }
-	    };
+		EventHandler<MouseEvent> Generate = new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent e) {
+				Alert fail = new Alert(AlertType.ERROR);
+				fail.setHeaderText("Invalid Information");
+				ArrayList<String> selectedTopics = new ArrayList<String>();
+				for (int i = 1; i < topicList.getChildren().size(); i++) {
+					if (((CheckBox) topicList.getChildren().get(i)).isSelected()) {
+						selectedTopics.add(((CheckBox) topicList.getChildren().get(i)).getText());
+					}
+				}
+				if (selectedTopics.size() == 0) {
+					fail.setContentText("No topics have been selected");
+				}
+				try {
+					if (fail.getContentText().equals("")) {
+						int numQuestions = Integer.parseInt(insertNum.getText());
+						GenerateQuiz generation = new GenerateQuiz(numQuestions, selectedTopics);
+						quizObject = generation.generate(questionList);
+						showStage(primaryStage, quiz(primaryStage, quizObject.getQuestion()));
+					} else {
+						fail.showAndWait();
+					}
+				} catch (Exception exception) {
+					fail.setContentText("A valid number wasn't typed in");
+					fail.showAndWait();
+				}
+			}
+		};
 
-	    // event calls
-	    back.addEventFilter(MouseEvent.MOUSE_CLICKED, BackToHomeEvent);
-	    finish.addEventFilter(MouseEvent.MOUSE_CLICKED, Generate);
+		// event calls
+		back.addEventFilter(MouseEvent.MOUSE_CLICKED, BackToHomeEvent);
+		finish.addEventFilter(MouseEvent.MOUSE_CLICKED, Generate);
 
-	    // CSS
-	    back.getStyleClass().addAll("custom-button", "basic-text");
-	    HBox.setMargin(back, new Insets(8, 0, 0, 0));
-	    titleText.getStyleClass().addAll("header-text");
-	    titleText.setFill(Color.rgb(13, 61, 137));
-	    HBox.setMargin(titleText, new Insets(0, 0, 0, 150));
-	    numQuestionsLabel.getStyleClass().addAll("basic-text");
-	    numQuestionsLabel.setFill(Color.rgb(13, 61, 137));
-	    HBox.setMargin(numQuestionsLabel, new Insets(3, 5, 0, 0));
+		// CSS
+		back.getStyleClass().addAll("custom-button", "basic-text");
+		HBox.setMargin(back, new Insets(8, 0, 0, 0));
+		titleText.getStyleClass().addAll("header-text");
+		titleText.setFill(Color.rgb(13, 61, 137));
+		HBox.setMargin(titleText, new Insets(0, 0, 0, 150));
+		numQuestionsLabel.getStyleClass().addAll("basic-text");
+		numQuestionsLabel.setFill(Color.rgb(13, 61, 137));
+		HBox.setMargin(numQuestionsLabel, new Insets(3, 5, 0, 0));
 
-	    insertNum.getStyleClass().addAll("custom-textfield");
-	    insertNum.setMaxWidth(50);
-	    topicLabel.getStyleClass().addAll("basic-text");
-	    topicLabel.setFill(Color.rgb(13, 61, 137));
-	    finish.getStyleClass().addAll("custom-button", "basic-text");
+		insertNum.getStyleClass().addAll("custom-textfield");
+		insertNum.setMaxWidth(50);
+		topicLabel.getStyleClass().addAll("basic-text");
+		topicLabel.setFill(Color.rgb(13, 61, 137));
+		finish.getStyleClass().addAll("custom-button", "basic-text");
 
-	    header.setPadding(new Insets(10, 0, 10, 0));
-	    numQuestions.setPadding(new Insets(0, 0, 10, 0));
-	    topicList.setPadding(new Insets(0, 0, 20, 0));
+		header.setPadding(new Insets(10, 0, 10, 0));
+		numQuestions.setPadding(new Insets(0, 0, 10, 0));
+		topicList.setPadding(new Insets(0, 0, 20, 0));
 
-	    root.getChildren().addAll(header, numQuestions, topicList, finish);
-	    root.setPadding(new Insets(0, 0, 0, 20));
+		root.getChildren().addAll(header, numQuestions, topicList, finish);
+		root.setPadding(new Insets(0, 0, 0, 20));
 
-	    Scene scene = new Scene(root, 800, 600);
-	    scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-	    return scene;
-	  }
+		Scene scene = new Scene(root, 800, 600);
+		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+		return scene;
+	}
 
 	public Scene quiz(Stage primaryStage, Question test) {
 
@@ -653,32 +667,35 @@ public class Main extends Application {
 			public void handle(MouseEvent e) {
 				boolean somethingSelected = true;
 				submission.getChildren().remove(next);
-				for(int i = 0; i < questionOptions.getChildren().size(); i++) {
-					if(((RadioButton)questionOptions.getChildren().get(i)).isSelected()) {
+				for (int i = 0; i < questionOptions.getChildren().size(); i++) {
+					if (((RadioButton) questionOptions.getChildren().get(i)).isSelected()) {
 						if (i == test.getCorrect()) {
-							((RadioButton)questionOptions.getChildren().get(i)).setText
-							(((RadioButton)questionOptions.getChildren().get(i)).getText() + " - :D Correct");
-							((RadioButton)questionOptions.getChildren().get(i)).setTextFill(Color.rgb(0, 128, 0));
+							((RadioButton) questionOptions.getChildren().get(i)).setText(
+									((RadioButton) questionOptions.getChildren().get(i)).getText() + " - :D Correct");
+							((RadioButton) questionOptions.getChildren().get(i)).setTextFill(Color.rgb(0, 128, 0));
 							quizObject.incCorrect();
 							somethingSelected = false;
-						}
-						else if(i != test.getCorrect()) {
-							((RadioButton)questionOptions.getChildren().get(i)).setText
-							(((RadioButton)questionOptions.getChildren().get(i)).getText() + " - X Incorrect");
-							
-							((RadioButton)questionOptions.getChildren().get(i)).setTextFill(Color.rgb(128, 0, 0));
-							
-							((RadioButton)questionOptions.getChildren().get(test.getCorrect())).setText
-							(((RadioButton)questionOptions.getChildren().get(test.getCorrect())).getText() + " - This is the correct answer");
-							((RadioButton)questionOptions.getChildren().get(test.getCorrect())).setTextFill(Color.rgb(0, 128, 0));
+						} else if (i != test.getCorrect()) {
+							((RadioButton) questionOptions.getChildren().get(i)).setText(
+									((RadioButton) questionOptions.getChildren().get(i)).getText() + " - X Incorrect");
+
+							((RadioButton) questionOptions.getChildren().get(i)).setTextFill(Color.rgb(128, 0, 0));
+
+							((RadioButton) questionOptions.getChildren().get(test.getCorrect())).setText(
+									((RadioButton) questionOptions.getChildren().get(test.getCorrect())).getText()
+											+ " - This is the correct answer");
+							((RadioButton) questionOptions.getChildren().get(test.getCorrect()))
+									.setTextFill(Color.rgb(0, 128, 0));
 							somethingSelected = false;
 						}
 					}
 				}
-				if(somethingSelected) {
-					((RadioButton)questionOptions.getChildren().get(test.getCorrect())).setText
-					(((RadioButton)questionOptions.getChildren().get(test.getCorrect())).getText() + " - This is the correct answer");
-					((RadioButton)questionOptions.getChildren().get(test.getCorrect())).setTextFill(Color.rgb(0, 128, 0));
+				if (somethingSelected) {
+					((RadioButton) questionOptions.getChildren().get(test.getCorrect()))
+							.setText(((RadioButton) questionOptions.getChildren().get(test.getCorrect())).getText()
+									+ " - This is the correct answer");
+					((RadioButton) questionOptions.getChildren().get(test.getCorrect()))
+							.setTextFill(Color.rgb(0, 128, 0));
 				}
 				submission.getChildren().add(nextQuestion);
 			}
@@ -690,14 +707,14 @@ public class Main extends Application {
 				showStage(primaryStage, finalScore(primaryStage));
 			}
 		};
-		
+
 		EventHandler<MouseEvent> NextQuestion = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent e) {
 				try {
 					Question next = quizObject.getQuestion();
 					showStage(primaryStage, quiz(primaryStage, next));
-				} catch(IndexOutOfBoundsException exception) {
+				} catch (IndexOutOfBoundsException exception) {
 					showStage(primaryStage, finalScore(primaryStage));
 				}
 			}
