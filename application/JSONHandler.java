@@ -89,6 +89,7 @@ public class JSONHandler {
 							else
 								option.put("isCorrect", "F");
 							option.put("choice", q.options.get(i));
+							choiceArray.add(option);
 						}
 						toAdd.put("choiceArray", choiceArray);
 					}

@@ -618,7 +618,6 @@ public class Main extends Application {
 		try {
 			System.out.println(test.getImage());
 			Image check = new Image(test.getImage());
-			System.out.println(check);
 			image.setImage(check);
 		} catch (Exception e) {
 			System.out.println();
