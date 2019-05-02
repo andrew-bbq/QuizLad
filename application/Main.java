@@ -1,6 +1,5 @@
 package application;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,8 +8,6 @@ import java.util.HashMap;
 import java.util.Optional;
 
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -29,6 +26,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -427,22 +425,19 @@ public class Main extends Application {
 
 	public Scene finalScore(Stage primaryStage) {
 
-		// Set numQuestions for testing
-		quizObject.setNumQuestions(1);
-
 		// Get values from quiz
-		int numQuestions = quizObject.getNumQuestions();
-		int numAnswered = quizObject.getAnswered();
-		int numCorrect = quizObject.getCorrect();
-		int percentCorrect = numCorrect / numQuestions;
+		double numQuestions = quizObject.getNumQuestions();
+		double numAnswered = quizObject.getIndex();
+		double numCorrect = quizObject.getCorrect();
+		double percentCorrect = (numCorrect / numQuestions) * 100;
 
 		// Creation of buttons and boxes
 		VBox vungryBox = new VBox();
 		HBox hungryBox = new HBox();
 		Text finalScore = new Text("Final Score");
-		Text score = new Text(percentCorrect + "%");
-		Text questionsAnswered = new Text("You answered " + numAnswered + " questions");
-		Text correctAnswers = new Text("You got " + numCorrect + " answers correct");
+		Text score = new Text((Math.round(percentCorrect * 100) / 100) + "%");
+		Text questionsAnswered = new Text("You answered " + (int)numAnswered + " questions");
+		Text correctAnswers = new Text("You got " + (int)numCorrect + " answers correct");
 		Button tryNewQuiz = new Button("Try New Quiz");
 		Button returnHome = new Button("Return Home");
 
@@ -606,7 +601,17 @@ public class Main extends Application {
 		Text questionNum = new Text("" + quizObject.getIndex());
 		Text questionTitle = new Text(test.getQuestionTitle());
 		ImageView image = new ImageView();
+		try {
+			System.out.println(test.getImage());
+			Image check = new Image(test.getImage());
+			System.out.println(check);
+			image.setImage(check);
+		} catch (Exception e) {
+			System.out.println();
+			// don't populate the image
+		}
 		Button next = new Button("Submit");
+		Button nextQuestion = new Button("Next");
 
 		final ToggleGroup optionSelector = new ToggleGroup();
 
@@ -640,12 +645,42 @@ public class Main extends Application {
 		questionNum.setFill(Color.rgb(13, 61, 137));
 		questionTitle.getStyleClass().addAll("basic-text");
 		questionTitle.setFill(Color.rgb(13, 61, 137));
+		nextQuestion.getStyleClass().addAll("basic-text", "custom-button");
 
 		// event handlers
 		EventHandler<MouseEvent> CheckQuestion = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent e) {
-				showStage(primaryStage, quiz(primaryStage, test));
+				boolean somethingSelected = true;
+				submission.getChildren().remove(next);
+				for(int i = 0; i < questionOptions.getChildren().size(); i++) {
+					if(((RadioButton)questionOptions.getChildren().get(i)).isSelected()) {
+						if (i == test.getCorrect()) {
+							((RadioButton)questionOptions.getChildren().get(i)).setText
+							(((RadioButton)questionOptions.getChildren().get(i)).getText() + " - :D Correct");
+							((RadioButton)questionOptions.getChildren().get(i)).setTextFill(Color.rgb(0, 128, 0));
+							quizObject.incCorrect();
+							somethingSelected = false;
+						}
+						else if(i != test.getCorrect()) {
+							((RadioButton)questionOptions.getChildren().get(i)).setText
+							(((RadioButton)questionOptions.getChildren().get(i)).getText() + " - X Incorrect");
+							
+							((RadioButton)questionOptions.getChildren().get(i)).setTextFill(Color.rgb(128, 0, 0));
+							
+							((RadioButton)questionOptions.getChildren().get(test.getCorrect())).setText
+							(((RadioButton)questionOptions.getChildren().get(test.getCorrect())).getText() + " - This is the correct answer");
+							((RadioButton)questionOptions.getChildren().get(test.getCorrect())).setTextFill(Color.rgb(0, 128, 0));
+							somethingSelected = false;
+						}
+					}
+				}
+				if(somethingSelected) {
+					((RadioButton)questionOptions.getChildren().get(test.getCorrect())).setText
+					(((RadioButton)questionOptions.getChildren().get(test.getCorrect())).getText() + " - This is the correct answer");
+					((RadioButton)questionOptions.getChildren().get(test.getCorrect())).setTextFill(Color.rgb(0, 128, 0));
+				}
+				submission.getChildren().add(nextQuestion);
 			}
 		};
 
@@ -655,10 +690,23 @@ public class Main extends Application {
 				showStage(primaryStage, finalScore(primaryStage));
 			}
 		};
+		
+		EventHandler<MouseEvent> NextQuestion = new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent e) {
+				try {
+					Question next = quizObject.getQuestion();
+					showStage(primaryStage, quiz(primaryStage, next));
+				} catch(IndexOutOfBoundsException exception) {
+					showStage(primaryStage, finalScore(primaryStage));
+				}
+			}
+		};
 
 		// button events
 		next.addEventFilter(MouseEvent.MOUSE_CLICKED, CheckQuestion);
 		exitQuiz.addEventFilter(MouseEvent.MOUSE_CLICKED, ExitQuiz);
+		nextQuestion.addEventFilter(MouseEvent.MOUSE_CLICKED, NextQuestion);
 
 		Scene scene = new Scene(root, 800, 600);
 		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());

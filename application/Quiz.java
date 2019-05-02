@@ -12,7 +12,6 @@ public class Quiz {
   public Quiz() {
     numQuestions = 0;
     numCorrect = 0;
-    numAnswered = 0;
     index = 0;
     questions = null;
   }
@@ -20,7 +19,6 @@ public class Quiz {
   public Quiz(int numQuestions, ArrayList<Question> questions) {
     this.numQuestions = numQuestions;
     numCorrect = 0;
-    numAnswered = 0;
     index = 0;
     this.questions = questions;
   }
@@ -28,9 +26,9 @@ public class Quiz {
   public int getCorrect() {
     return numCorrect;
   }
-
-  public int getAnswered() {
-    return numAnswered;
+  
+  public void incCorrect() {
+	  numCorrect++;
   }
 
   public Question getQuestion() {

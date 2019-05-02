@@ -27,4 +27,8 @@ public class Question {
   public String getQuestionTitle() {
     return this.questionTitle;
   }
+  
+  public String getImage() {
+	  return this.imagePath;
+  }
 }
