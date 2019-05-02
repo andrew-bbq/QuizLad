@@ -76,7 +76,6 @@ public class Main extends Application {
 				alert.setHeaderText("You're about to exit");
 				alert.setContentText("Do you want to save your questions to a JSON?");
 				Optional<ButtonType> result = alert.showAndWait();
-				System.out.println(result.get().getText());
 				if (result.isPresent()) {
 					
 				} if (result.get() == ButtonType.YES) {
@@ -604,8 +603,8 @@ public class Main extends Application {
 
 		Button exitQuiz = new Button("Exit Quiz");
 		Text questionHead = new Text("Question ");
-		Text questionNum = new Text("1");
-		Text questionTitle = new Text("Testing question title here.");
+		Text questionNum = new Text("" + quizObject.getIndex());
+		Text questionTitle = new Text(test.getQuestionTitle());
 		ImageView image = new ImageView();
 		Button next = new Button("Submit");
 
@@ -663,6 +662,7 @@ public class Main extends Application {
 
 		Scene scene = new Scene(root, 800, 600);
 		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+		questionTitle.wrappingWidthProperty().bind(scene.widthProperty());
 		return scene;
 	}
 }
