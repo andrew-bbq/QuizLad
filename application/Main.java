@@ -52,7 +52,6 @@ public class Main extends Application {
 
 	final FileChooser fc = new FileChooser();
 
-
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -67,7 +66,6 @@ public class Main extends Application {
 			e.printStackTrace();
 		}
 
-
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			public void handle(WindowEvent exitApp) {
 				Alert alert = new Alert(AlertType.INFORMATION,
@@ -78,12 +76,13 @@ public class Main extends Application {
 				Optional<ButtonType> result = alert.showAndWait();
 				System.out.println(result.get().getText());
 				if (result.isPresent()) {
-					
-				} if (result.get() == ButtonType.YES) {
+
+				}
+				if (result.get() == ButtonType.YES) {
 					File file = fc.showSaveDialog(primaryStage);
 					importExport.generateJSON(questionList, file.getAbsolutePath().toString());
 				} else if (result.get() == ButtonType.NO) {
-					
+
 				}
 			}
 		});
@@ -105,8 +104,7 @@ public class Main extends Application {
 		for (String key : questionList.keySet()) {
 			size += questionList.get(key).size();
 		}
-		
-		
+
 		final FileChooser fc = new FileChooser();
 
 		// Creation of buttons and boxes
@@ -164,7 +162,6 @@ public class Main extends Application {
 		takeQuiz.addEventFilter(MouseEvent.MOUSE_CLICKED, MakeQuizSceneEvent);
 		export.addEventFilter(MouseEvent.MOUSE_CLICKED, ExportQuestions);
 		importBooks.addEventFilter(MouseEvent.MOUSE_CLICKED, ImportJSONEvent);
-		
 
 		// Create comboBox with possible topics
 		ObservableList<String> topicList = FXCollections.observableArrayList(questionList.keySet());
@@ -173,19 +170,18 @@ public class Main extends Application {
 		topics.setItems(topicList);
 		if (!topicList.isEmpty())
 			topics.getSelectionModel().selectFirst();
-		
+
 		// Display questions for default topic
 		ArrayList<Question> topicQuestions = questionList.get(topics.getValue());
 		ObservableList<String> questionTitles = FXCollections.observableArrayList();
 		if (topicQuestions != null) {
-			for(String key : questionList.keySet()) {
-			for (Question question : questionList.get(key)) {
-				questionTitles.add(key + " - " + question.getQuestionTitle());
+			for (String key : questionList.keySet()) {
+				for (Question question : questionList.get(key)) {
+					questionTitles.add(key + " - " + question.getQuestionTitle());
+				}
 			}
 		}
-		}
 		ListView<String> list = new ListView<String>(questionTitles);
-	
 
 		takeQuiz.getStyleClass().addAll("custom-button", "basic-text");
 		addNewQuestion.getStyleClass().addAll("custom-button", "basic-text");
@@ -594,6 +590,7 @@ public class Main extends Application {
 		Text questionTitle = new Text("Testing question title here.");
 		ImageView image = new ImageView();
 		Button next = new Button("Submit");
+		Button nextQuestion = new Button("Next");
 
 		final ToggleGroup optionSelector = new ToggleGroup();
 
@@ -627,12 +624,14 @@ public class Main extends Application {
 		questionNum.setFill(Color.rgb(13, 61, 137));
 		questionTitle.getStyleClass().addAll("basic-text");
 		questionTitle.setFill(Color.rgb(13, 61, 137));
+		nextQuestion.getStyleClass().addAll("basic-text", "custom-button");
 
 		// event handlers
 		EventHandler<MouseEvent> CheckQuestion = new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent e) {
-				showStage(primaryStage, quiz(primaryStage, test));
+				submission.getChildren().remove(next);
+				submission.getChildren().add(nextQuestion);
 			}
 		};
 
@@ -643,9 +642,21 @@ public class Main extends Application {
 			}
 		};
 
+		EventHandler<MouseEvent> NextQuestion = new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent e) {
+				Question next = quizObject.getQuestion();
+				if (next != null)
+					showStage(primaryStage, quiz(primaryStage, next));
+				else
+					showStage(primaryStage, finalScore(primaryStage));
+			}
+		};
+
 		// button events
 		next.addEventFilter(MouseEvent.MOUSE_CLICKED, CheckQuestion);
 		exitQuiz.addEventFilter(MouseEvent.MOUSE_CLICKED, ExitQuiz);
+		nextQuestion.addEventFilter(MouseEvent.MOUSE_CLICKED, NextQuestion);
 
 		Scene scene = new Scene(root, 800, 600);
 		scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
